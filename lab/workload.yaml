@@ -1,0 +1,41 @@
+# A "training" workload that asks for one GPU per replica, protected by a PodDisruptionBudget.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trainer
+  namespace: ml
+spec:
+  replicas: 3
+  selector:
+    matchLabels: {app: trainer}
+  template:
+    metadata:
+      labels: {app: trainer}
+    spec:
+      terminationGracePeriodSeconds: 5
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: {app: trainer}
+      containers:
+        - name: trainer
+          image: PAUSE_IMAGE
+          resources:
+            limits: {nvidia.com/gpu: "1"}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: trainer
+  namespace: ml
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels: {app: trainer}
