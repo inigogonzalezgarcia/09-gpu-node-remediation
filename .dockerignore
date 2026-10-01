@@ -1,0 +1,7 @@
+.git
+docs
+scripts
+deploy
+lab
+kind
+*.md
