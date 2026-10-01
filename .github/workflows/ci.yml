@@ -1,0 +1,65 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || { gofmt -l .; exit 1; }
+      - name: vet
+        run: go vet ./...
+      - name: test
+        run: go test -race -count=1 ./...
+      - name: Build gpuremediate for Linux and Windows
+        run: |
+          mkdir -p dist
+          GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_SHA::7}" -o dist/gpuremediate-linux-amd64 ./cmd/gpuremediate
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=${GITHUB_SHA::7}" -o dist/gpuremediate-windows-amd64.exe ./cmd/gpuremediate
+          (cd dist && sha256sum ./* | tee SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gpuremediate-binaries
+          path: dist/
+          retention-days: 30
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck -x scripts/*.sh
+
+  e2e:
+    needs: [unit, lint]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kind
+        run: |
+          source scripts/versions.env
+          # Downloaded to /tmp: the repository already has a kind/ directory.
+          curl -fsSLo /tmp/kind "https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-linux-amd64"
+          sudo install -m 0755 /tmp/kind /usr/local/bin/kind
+          kind version
+          kubectl version --client
+      - name: Build the lab
+        run: bash scripts/up.sh
+      - name: Run the scenarios
+        run: bash scripts/test.sh
+      - name: Diagnostics
+        if: failure()
+        run: bash scripts/diagnose.sh
