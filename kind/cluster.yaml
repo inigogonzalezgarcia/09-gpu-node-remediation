@@ -1,0 +1,15 @@
+# One control plane (runs the controller) and three "GPU" workers.
+# The workers get the label dcgm-exporter / GPU Feature Discovery would set on real GPU nodes.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+  - role: worker
+    labels:
+      nvidia.com/gpu.present: "true"
+  - role: worker
+    labels:
+      nvidia.com/gpu.present: "true"
+  - role: worker
+    labels:
+      nvidia.com/gpu.present: "true"
