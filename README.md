@@ -106,10 +106,6 @@ The exit code is the action (0 none, 1 watch, 2 cordon, 3 drain, 4 quarantine, 1
 - [docs/decisions.md](docs/decisions.md): design decisions and trade-offs
 - [docs/runbook.md](docs/runbook.md): operating it, releasing quarantined nodes, troubleshooting
 
-## How AI was used
-
-Built with an AI assistant (Claude) as a pair programmer: it drafted the code, tests and documentation from the scope I set, and the XID policy was built from NVIDIA's public XID documentation. CI runs the unit tests and the full kind scenario suite on each push; nothing is marked as working unless that run passes. Responsibility for the result stays with me.
-
 ## Roadmap
 
 - Run against real dcgm-exporter metrics on a GPU node and compare with the simulator.
