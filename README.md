@@ -68,6 +68,22 @@ kubectl get nodes -o custom-columns='NAME:.metadata.name,STATE:.metadata.annotat
 
 Plus unit tests for the rules, the state machine (with a fake cluster), the API client, the parsers and the simulator.
 
+Excerpt from a CI run (28 checks, 0 failed):
+
+```
+==> 2. XID 79 (fallen off the bus) on gpu-lab-worker: full cycle, PodDisruptionBudget respected
+  PASS  cordoned and draining
+  PASS  drain waits while the PDB allows no disruption (1 trainer pod(s) still on gpu-lab-worker)
+  PASS  repaired, validated by a Job and returned to service
+==> 5. Second XID 79 on gpu-lab-worker within the repeat window: repeat offender goes to quarantine
+  PASS  reason: GPU 5: XID 79, GPU has fallen off the bus (drain); repeat offender: 2 incident(s) in the last 1h0m0s
+==> 8. Controller metrics
+    gpu_remediation_actions_total{action="drain"} 6
+    gpu_remediation_actions_total{action="evict"} 8
+    gpu_remediation_actions_total{action="repair"} 4
+    gpu_remediation_actions_total{action="quarantine"} 3
+```
+
 ## Check a real GPU (Linux or Windows)
 
 The same health rules can run on any machine with an NVIDIA driver, no Kubernetes needed. CI builds `gpuremediate-windows-amd64.exe` and a Linux binary on every push (Actions → latest run → *gpuremediate-binaries*).
