@@ -1,0 +1,62 @@
+# Least privilege for the remediation loop. Everything here maps to one call in internal/k8s.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gpu-remediation
+  namespace: gpu-remediation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gpu-remediation
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "patch"]          # read state, write annotations/labels, cordon
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]                          # what runs on a node
+  - apiGroups: [""]
+    resources: ["pods/eviction"]
+    verbs: ["create"]                        # evictions go through PodDisruptionBudgets
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create"]                        # visible in kubectl describe node
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gpu-remediation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gpu-remediation
+subjects:
+  - kind: ServiceAccount
+    name: gpu-remediation
+    namespace: gpu-remediation
+---
+# Validation Jobs only in the controller's own namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gpu-remediation-jobs
+  namespace: gpu-remediation
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gpu-remediation-jobs
+  namespace: gpu-remediation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gpu-remediation-jobs
+subjects:
+  - kind: ServiceAccount
+    name: gpu-remediation
+    namespace: gpu-remediation
