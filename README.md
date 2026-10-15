@@ -117,7 +117,7 @@ The exit code is the action (0 none, 1 watch, 2 cordon, 3 drain, 4 quarantine, 1
 
 Want to talk about GPU node health, Kubernetes day 2 operations or a lab like this for your team? Get in touch:
 
-- Email: [inigogonzalezgarcia@yahoo.es](mailto:inigogonzalezgarcia@yahoo.es)
+- Website (contact form): [inigogonzalezgarcia.github.io](https://inigogonzalezgarcia.github.io/about.html#contacto)
 - LinkedIn: [linkedin.com/in/igonzalez93](https://www.linkedin.com/in/igonzalez93)
 
 ## License
