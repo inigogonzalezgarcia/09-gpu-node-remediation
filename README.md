@@ -6,7 +6,7 @@ A small Kubernetes controller that takes unhealthy GPU nodes out of service, rep
 
 ![ci](https://github.com/inigogonzalezgarcia/09-gpu-node-remediation/actions/workflows/ci.yml/badge.svg)
 
-> A learning-in-public lab about "day 2" operations for GPU clusters. I don't have production GPU fleet experience; this project is how I am learning the problem. There is no real GPU in CI: the nodes run a simulator that serves the same metric names as NVIDIA's dcgm-exporter. The `check` mode below runs against a real GPU through `nvidia-smi`.
+> A lab on "day 2" operations for GPU clusters, built on my hardware operations background: validating and certifying servers and automating the detection and remediation of hardware failures. In CI the nodes run a simulator that serves the same metric names as NVIDIA's dcgm-exporter, so anyone can reproduce it. The `check` mode below runs against a real GPU through `nvidia-smi`.
 
 ```
 Healthy ──(XID 79, ECC…)──▶ Draining ──▶ Repairing ──▶ Validating ──▶ Healthy
